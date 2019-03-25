@@ -70,6 +70,13 @@ class UsersController < ApplicationController
     end
   end
   
+  def working
+    
+  end
+  
+  def bases
+    
+  end
   
   private
   
