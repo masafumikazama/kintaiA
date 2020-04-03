@@ -142,3 +142,22 @@ input, textarea, select, .uneditable-input {
   width: 30%;
   margin: auto;
 }
+
+
+#submit-btn {
+  display: inline-block;
+  padding: 14px 140px;
+  background-color: #5dca88;
+  border: none;
+  border-radius: 3px;
+  color: white;
+  margin: 10px auto;
+  cursor: pointer;
+}
+
+/* モーダルウインドウの位置調整 */
+
+.modal-dialog-center {
+  padding-top: 10%;
+}
+

@@ -3,9 +3,24 @@
 
 <div>
   <table class = "table-bordered table-condensed">
+   <thead>  
     <tr>
       <th>社員番号</th>
       <th>名前</th>
     </tr>
+   </thead>
+   
+   <tbody>
+    
+    
+    <% @users.zip(@attendances).each do |user, attendance| %>
+     <tr>
+       <th><%= user.user_id %></th>
+       <th><%= attendance.user.name %></th>
+     </tr>
+   
+   <% end %>
+   </tbody>
+   
   </table>
 </div>  

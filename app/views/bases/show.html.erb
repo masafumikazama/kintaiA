@@ -1,0 +1,101 @@
+<% provide(:title, '拠点一覧') %>
+<h1>拠点一覧</h1>
+
+<div>
+ <table class = "table-bordered table-striped table-condensed">
+  <thead>
+   <tr>
+    <th></th>
+    <th></th>
+    <th>拠点番号</th>
+    <th>拠点名</th>
+    <th>勤怠種類</th>
+   </tr>
+  </thead>
+  
+  <div class="container">
+  <button type="button" class="btn btn-primary mt-5" data-toggle="modal" data-target="#post">拠点情報追加</button>
+  <div class="modal fade" id="post" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+         <h3>拠点情報追加</h3>
+          <div class="row">
+           <div class="col-md-6 col-md-offset-3">
+            <%= form_for @base,:url => {controller: "bases", action: "create"} do |f| %>
+              <%= f.label :拠点番号 %>
+              <%= f.number_field :number %>
+            
+              <%= f.label :拠点名 %>
+              <%= f.text_field :name %>
+              
+              <%= f.label :勤怠種類 %>
+              <%= f.text_field :attendance %>
+              
+              <%= f.submit "拠点情報追加", class: "btn btn-primary" %>
+            <% end %>
+           </div>
+          </div> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  
+  <tbody>
+  <% if @bases.present? %>
+  <% @bases.each do |base| %>
+   <tr>
+    <td>
+     
+     
+     <button type="button" class="btn btn-primary mt-5" data-toggle="modal" data-target="#get">編集</button>
+  <div class="modal fade" id="get" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+         <h3>拠点情報編集</h3>
+          <div class="row">
+           <div class="col-md-6 col-md-offset-3">
+            <%= form_for(base) do |f| %>
+              <%= f.label :拠点番号 %>
+              <%= f.number_field :number %>
+            
+              <%= f.label :拠点名 %>
+              <%= f.text_field :name %>
+              
+              <%= f.label :勤怠種類 %>
+              <%= f.text_field :attendance %>
+              
+              <%= f.submit "拠点情報編集", class: "btn btn-primary" %>
+            <% end %>
+           </div>
+          </div> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+   
+    
+    </td>
+    <td><%= link_to "削除", base, method: :delete, data: { confirm: "削除してよろしいですか？" } %></td>
+    <td><%= base.number %></td>
+    <td><%= base.name %></td>
+    <td><%= base.attendance %></td>
+   </tr>
+  <% end %> 
+  <% end %> 
+  </tbody>
+  
+ </table>
+</div>
+
+

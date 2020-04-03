@@ -1,0 +1,43 @@
+<div class="modal-dialog modal-lg modal-dialog-center">
+  <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">【勤怠申請】</h4>
+      </div>
+      <div class="modal-body">
+        
+        <% @attendances.each do |attendance| %> 
+        <%= form_with(model: @attendance, url: update_superior_approval_user_path(@user), local: true, method: :patch) do |f| %>
+         <h3><%= @user.name %>からの一か月分勤怠申請</h3>
+        <table class="table table-bordered">
+          <thead>
+          <tr>
+           <th>月</th>
+           <th>指示者確認㊞</th>
+           <th>変更</th>
+           <th>勤怠を確認する</th>
+         </tr>
+         </thead>
+       <tbody>
+         <tr>
+          <td><%= @first_day.month %>月</td>
+          <td><%= f.select :month_approval, [["なし", "なし"],["申請中", "申請中"],["承認", "承認"],["否認", "否認"]],:include_blank => true ,class:"form-control" %></td>
+          <td><%= f.check_box(:change_edit, { :checked => false  }, 1, nil ) %></td>
+          <td><%= link_to "確認", confirm_user_path , class: "btn btn-primary" %></td>
+         </tr>
+       </tbody>
+      </table>
+
+     
+      <div class="modal-footer">
+        <%= f.submit "変更を送信する", class: "btn btn-primary" %>
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+      
+      <% end %>
+      <% end %>
+      
+    </div>
+    </div>
+  </div>
+</div>  

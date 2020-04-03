@@ -1,0 +1,8 @@
+
+<% @dates.each do |day| %>
+
+ $("#<%= day.id %>").html("<%= escape_javascript(render 'edit_overwork_request') %>");
+ $("#<%= day.id %>").modal("show");
+<% break %> 
+<%end%>
+

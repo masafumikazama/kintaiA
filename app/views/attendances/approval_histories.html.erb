@@ -1,0 +1,60 @@
+<% provide(:title, '勤怠修正ログ（承認済）') %>
+<h1>勤怠修正ログ（承認済）</h1>
+
+
+<script type="text/javascript">
+$(function() {
+  $('#_ymd_2i').change(function() {
+   $('#form').submit();
+   　
+  });
+});  
+</script>
+
+
+<div>
+ <table class = "table-bordered table-striped table-condensed">
+  <thead>
+ 
+   <tr>
+    <th>日付</th>
+    <th>変更前出社時間</th>
+    <th>変更前退社時間</th>
+    <th>変更後出社</th>
+    <th>変更後退社</th>
+    <th>承認者</th>
+    <th>承認日</th>
+   </tr>
+  </thead>
+<%= form_with(url: attendances_approval_histories_user_path(@user), local: true, id: "form") do |f| %>
+
+
+<%= f.date_select :ymd, {include_blank: true, start_year:2018, end_year:Time.now.year, discard_day:true} %>
+<%= f.submit "変更を送信する", class: "btn btn-primary" %>
+
+<% @attendances.each do |attendance| %>
+  <tbody class = "attendance">
+    
+    <tr>
+      <th><%= attendance.worked_on.to_s(:date) %></th>
+      <th><%= attendance.started_at && attendance.started_at.to_s(:time) %></th>
+      <th><%= attendance.finished_at && attendance.finished_at.to_s(:time) %></th>
+      <th><%= attendance.started_edit && attendance.started_edit.to_s(:time) %></th>
+      <th><%= attendance.finished_edit && attendance.finished_edit.to_s(:time) %></th>
+      <th>
+        <% if attendance.superior_sign.present? %>
+          <%= @superior.name %>
+        <% end %>
+      </th>
+      <th><%= attendance.approval_date %></th>
+    </tr>
+    
+  </tbody>
+  <% end %>
+ <% end %>
+  
+ </table>
+ 
+</div>
+
+

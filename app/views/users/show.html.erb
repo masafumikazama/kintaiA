@@ -12,8 +12,8 @@
       <td><%= link_to "←", user_path(params: {id: @user.id, first_day: @first_day.prev_month }), class: "btn btn-xs btn-primary" %> &emsp;<%= @first_day.to_s(:year_month) %>時間管理表&emsp; 
           <%= link_to "→", user_path(params: {id: @user.id, first_day: @first_day.next_month }), class: "btn btn-xs btn-primary" %></td>
       <td>
-         <p>指定勤務開始時間<%= format_basic_time(@user.work_time) %></p>
-         <p>指定勤務終了時間<%= format_basic_time(@user.work_time) %></p>
+         <p>指定勤務開始時間<%= format_basic_time(@user.designated_work_start_time) %></p>
+         <p>指定勤務終了時間<%= format_basic_time(@user.designated_work_end_time) %></p>
         </td>
       <td colspan = "3">基本時間<%= format_basic_time( @user.basic_time) %></td>
       <td>月の初日<%= @first_day.to_s(:date) %></td>
@@ -27,13 +27,36 @@
       <td>出勤日数:<%= @worked_sum %>日</td>
       <td>月の末日<%= @last_day.to_s(:date) %></td>
     </tr>
-  </table>    
-<p>【所属長承認申請のお知らせ】</p>
-<p>【勤怠変更申請のお知らせ】</p>
-<p>【残業申請のお知らせ】</p>
+  </table> 
+  
+<% if current_user.id < 4 %>
+
+ <p>
+   <%= link_to "【所属長承認申請のお知らせ】", attendances_edit_superior_approval_user_path(@user), remote: true, :style=>"color:red;" %> <%= @count_b.count %>件の通知があります
+ <div id="edit_superior_approval" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+ 
+
+ </p>
+ 
+ 
+ <p>
+   <%= link_to "【勤怠変更申請のお知らせ】", attendances_edit_attendance_approval_user_path(@user), remote: true, :style=>"color:red;" %> <%= @count_a.count %>件の通知があります
+ <div id="edit_attendance_approval" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+ 
+
+ </p>
+ 
+ <p>
+ <%= link_to "【残業申請のお知らせ】", attendances_edit_overwork_approval_user_path(@user), remote: true, :style=>"color:red;" %> <%= @count.count %>件の通知があります
+ <div id="edit_overwork_approval" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
+ 
+ 
+ </p>
+<% end %>
+
 <%= link_to "勤怠を編集", edit_attendances_path(@user, @first_day), class: "btn btn-primary" %>
-<%= link_to "CSV出力", "#" , class: "btn btn-primary" %>
-<p><%= link_to "勤怠修正ログ（承認済）", "#" , class: "btn btn-primary" %></p>
+<%= link_to "CSV出力", export_user_path(@user, format: :csv) , class: "btn btn-primary" %>
+<p><%= link_to "勤怠修正ログ（承認済）", attendances_approval_histories_user_path(@user) , class: "btn btn-primary" %></p>
 
   <table class = "table-bordered table-striped table-condensed">
     <thead>
@@ -63,15 +86,20 @@
         <th>時</th>
         <th>分</th>
         <th></th>
-        <th>時</th>
-        <th>分</th>
+        <th></th>
+        <th></th>
       </tr>
     </thead>
     
   <tbody>
     <% @dates.each do |day| %>
      <tr>
-      <td><%= button_to "残業申請", "#" , class: "btn btn-xs btn-primary" %></td> 
+      <td>
+       <%= link_to "残業申請", edit_overwork_request_user_path(@user, params:{ day: day.worked_on, youbi: %w{日 月 火 水 木 金 土}[day.worked_on.wday] }), remote: true, class: "btn btn-primary"  %>
+ 
+       <!-- Modal -->
+       <div id="<%= day.id %>" class="modal fade"  tabindex="-1"  role="dialog" aria-hidden="true"></div>
+      </td> 
       <td><%= day.worked_on.to_s(:date) %></td>
       <td><%= %w{日 月 火 水 木 金 土}[day.worked_on.wday] %></td>
       <td><%= day.started_at.to_s(:hour) if day.started_at.present? %></td>
@@ -96,11 +124,39 @@
           <% end %>
       </td>
       <td><%= day.note %></td>
+      <td><%= day.finished_overwork_at && day.finished_overwork_at.to_s(:time) %></td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>
+        <% if day.next_day == 1 %>
+        <%= day.finished_overwork_at && day.finished_overwork_at.to_s(:time).to_f - format_basic_time(@user.designated_work_end_time).to_f + 24 %>
+         <% else %>
+        <%= day.finished_overwork_at && day.finished_overwork_at.to_s(:time).to_f - format_basic_time(@user.designated_work_end_time).to_f %> 
+        <% end %>
+      </td>
+      <td><%= day.work_process %></td>
+      <td><% if day.superior.present? %>
+          <%= "上長" %>
+           <%= "残業申請中" %>
+           <%= day.approval %>
+          <% end %>
+          
+          <% if day.change == 1 %>
+           <%= day.overwork_approval %>
+          <% else %>
+           
+          <% end %>
+          
+          <% if day.superior_sign.present? %>
+           <%= "上長" %>
+           <%= "勤怠変更申請中" %>
+          <% end %>
+          
+          <% if day.change_attendance == 1 %>
+           <%= day.approval %>
+          <% else %>
+           
+          <% end %>
+      </td>
      </tr>
     <% end %>
   </tbody>
@@ -121,7 +177,37 @@
         <td><%= working_times_sum(@total_seconds) unless @total_seconds.nil? %></td>
         <td></td>
         <td></td>
-        <td>所属長承認</td>
+        <td>所属長承認
+        <% if @attendance.change_edit == 1 %>
+        <%= @attendance.month_approval %>
+        <% end %>
+            <%= form_with(model: @user, url: attendances_month_approval_user_path(@user), local: true, method: :patch) do |f| %>
+             <%= f.hidden_field :id, :value => @user.id %>
+             <%= f.hidden_field :first_day, :value => @first_day %>
+            
+              <% if current_user.id == 2 %>
+               <%= f.collection_select :superior_approval, User.where(superior: true).where(id: 3), :id, :name %>
+              <% elsif current_user.id == 3 %>
+               <%= f.collection_select :superior_approval, User.where(superior: true).where(id: 2), :id, :name %>
+              <% else %> 
+               <%= f.collection_select :superior_approval, User.where(superior: true), :id, :name  %>
+              <% end %> 
+            
+             <%= f.submit "申請", class: "btn btn-primary" %>
+            
+            <% end %>
+            <% if @attendance.superior_approval == 2 %>
+            <%= "上長" %>
+            <%= "所属長承認申請中" %>
+            <% end %>
+            
+            <% if @attendance.change_edit == 1 %>
+             <%= @attendance.month_approval %>
+            <% else %>
+           
+            <% end %>
+        
+        </td>
       </tr>
   </tfoot>
  </table>

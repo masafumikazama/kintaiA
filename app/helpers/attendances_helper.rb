@@ -26,19 +26,39 @@ module AttendancesHelper
     @user.attendances.where('worked_on >= ? and worked_on <= ?', @first_day, @last_day).order('worked_on')
   end
   
+  def working_time(attendance)
+    unless attendance.next_day?
+      format("%.2f", (((attendance.finished_at - attendance.started_at) / 60) / 60.0))
+    else
+      format("%.2f", (((attendance.finished_at - attendance.started_at) / 60) / 60.0) + 24) 
+    end
+  end
+  
+  
   def attendances_invalid?
     attendances = true
     attendances_params.each do |id, item|
-      if item[:started_at].blank? && item[:finished_at].blank?
+      if item[:started_edit].blank? && item[:finished_edit].blank?
         next
-      elsif item[:started_at].blank? || item[:finished_at].blank?
+      elsif item[:started_edit].blank? || item[:finished_edit].blank?
         attendances = false
         break
-      elsif item[:started_at] > item[:finished_at]
+      elsif item[:started_edit] > item[:finished_edit]
         attendances = false
         break
       end
     end
+  end
+  
+  def approvals_invalid?
+    attendances = true
+    approvals_params.each do |id, item|
+      if item["superior_approval"].blank?
+        attendances = false
+        break
+      end
+    end
+    return attendances
   end
 
 end
